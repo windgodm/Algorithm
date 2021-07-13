@@ -23,3 +23,15 @@ hamming_encode(x, n=4)，hamming_decode(x, n=4) 分别是汉明码的编码与�
 
 hamming_encode_by_block(x, n=4)，hamming_decode_by_block(x, n=4) 分别是编码与解码，可以处理任意长度的数据。通过把任意长度的数据按顺序切分成多份同样大小的数据来编码，再合并。其中x是输入数据，应为一个整数。n是奇偶校验位的位数。
 
+## C++实现
+
+```cpp
+unsigned int status;
+// unsigned int ==> 32 bit
+// ==> number of parity bits no more than 32
+// what's more, it's sure that number of data's bits less than code
+```
+
+HammingCode.cpp/h 是用于汉明码编码解码的类。
+
+main.cpp 是一个使用示例。
