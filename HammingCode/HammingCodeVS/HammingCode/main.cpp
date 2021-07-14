@@ -48,6 +48,10 @@ int main()
     }
     cout << endl << endl;
 
+    // Noise
+
+    c[0] ^= 0x40;
+
     // Decode
 
     // 1. Set code
@@ -67,10 +71,12 @@ int main()
 
     // debug
     cout << "decode:\n";
+    unsigned long long ull = 0;
     for (int i = 0; i < m_Bytes; i++) {
         cout << hex << (int)m_[i] << " ";
+        ull += (unsigned long long)m_[i] << (i << 3);
     }
-    cout << endl << std::dec << *(unsigned long long*)m_;
+    cout << endl << std::dec << ull << endl;
     cout << endl << endl;
 
     return 0;

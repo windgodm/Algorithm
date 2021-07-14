@@ -6,15 +6,15 @@
 class HammingCode
 {
 private:
-	unsigned char parityBitNum;
-	unsigned int dataBits;  // size of each block of data(bit)
-	unsigned int dataMask; // (1<<dataBits)-1 = b111...
-	unsigned int codeBytes; // size of each hamming code(bytes)
+	unsigned char parityBitNum; // no more than 32
+	unsigned int dataBits;      // size of each block of data(bit)
+	unsigned int dataMask;      // (1<<dataBits)-1 = b111...
+	unsigned int codeBytes;     // size of each hamming code(bytes)
 public:
 	unsigned char* data;
-	unsigned int dataBufBytes; // size of data(bytes)
+	unsigned int dataBufBytes;  // size of data(bytes)
 	unsigned char* code;
-	unsigned int codeBufBytes; // size of code(bytes)
+	unsigned int codeBufBytes;  // size of code(bytes)
 	
 public:
 	HammingCode();
@@ -22,7 +22,7 @@ public:
 	void SetParityBitNum(unsigned char parityBitNum);
 	unsigned int GetDataBufBytes();
 	unsigned int GetCodeBufBytes();
-	unsigned int Check();
+	unsigned int Check(unsigned int offset);
 	void Encode();
 	void Decode();
 };
