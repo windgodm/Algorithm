@@ -18,30 +18,29 @@ def hamming_status(x):
 def hamming_encode(x, n = 4):
     
     hc = 0
-    l = 2 # l >= 3
-    dataBitNum = (1<<n)-n-1
-    for i in range(dataBitNum):
+    l = 3
+    dataNum = (1<<n)-n-1
+    for i in range(dataNum):
+        hc |= (x & 1) << l
+        x >>= 1
         if l & l+1 :             # if l != 2**n - 1
             l += 1
         else:                    # if l == 2**n - 1
             l += 2               # skip l=2**n
-        hc |= (x & 1) << l
-        x >>= 1
 
     sta = hamming_status(hc)
     for l in range(n):
         if sta & 1:
             hc |= 1 << (1 << l)  # hc |= 2**2**l
         sta >>= 1
-    sta = hamming_status(hc)
 
     return hc
 
 
 def hamming_encode_by_block(x, n = 4):
 
-    # n is the number of check bit
-    if n < 4:
+    # n is the number of check(parity) bit
+    if n < 3:
         return None
 
     dataNum = (1<<n)-n-1 # number of data bit
@@ -105,15 +104,19 @@ if __name__ == "__main__":
     # input
 
     i = 1145141919810
+    n = 4
     if len(sys.argv) == 2:
         i = int(sys.argv[1])
+    elif len(sys.argv) == 3:
+        i = int(sys.argv[1])
+        n = int(sys.argv[2])
     print('input:')
     print(i)
     print()
 
     # encode
 
-    hc = hamming_encode_by_block(i, 4)
+    hc = hamming_encode_by_block(i, n)
     print('hamming encode(hex little):')
     print(hc.hex())
     print()
@@ -124,6 +127,6 @@ if __name__ == "__main__":
 
     # decode
 
-    c = hamming_decode_by_block(hc_noise, 4)
+    c = hamming_decode_by_block(hc_noise, n)
     print('\ndecode:')
     print(c)
