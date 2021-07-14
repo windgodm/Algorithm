@@ -4,37 +4,38 @@ HammingCode::HammingCode()
 {
 	SetParityBitNum(4);
 	data = nullptr;
-	dataBytesNum = 0;
+	dataBufBytes = 0;
 	code = nullptr;
-	codeBytesNum = 0;
+	codeBufBytes = 0;
 }
 
-HammingCode::HammingCode(unsigned char* data, unsigned int dataBytesNum, unsigned char* code, unsigned int codeBytesNum, unsigned char parityBitNum)
+HammingCode::HammingCode(unsigned char* data, unsigned int dataBufBytes, unsigned char* code, unsigned int codeBufBytes, unsigned char parityBitNum)
 {
 	SetParityBitNum(parityBitNum);
 	this->data = data;
-	this->dataBytesNum = dataBytesNum;
+	this->dataBufBytes = dataBufBytes;
 	this->code = code;
-	this->codeBytesNum = codeBytesNum;
+	this->codeBufBytes = codeBufBytes;
 }
 
 void HammingCode::SetParityBitNum(unsigned char parityBitNum)
 {
 	this->parityBitNum = parityBitNum;
-	dataNum = (1 << parityBitNum) - parityBitNum - 1;
-	dataMask = ((1 << dataNum) - 1);
-	bytesNum = 1 << (parityBitNum - 3);
+	dataBits = (1 << parityBitNum) - parityBitNum - 1;
+	dataMask = ((1 << dataBits) - 1);
+	codeBytes = 1 << (parityBitNum - 3);
 }
 
-unsigned int HammingCode::GetDataBytesNum()
+unsigned int HammingCode::GetDataBufBytes()
 {
-	// todo
-	return codeBytesNum;
+	// ceil((codeBufBytes * dataBits) / (2**parityBitNum))
+	return (((codeBufBytes * dataBits) - 1) >> parityBitNum) + 1;
 }
 
-unsigned int HammingCode::GetCodeBytesNum()
+unsigned int HammingCode::GetCodeBufBytes()
 {
-	return (((dataBytesNum << 3) - 1) / dataNum + 1) << (parityBitNum - 3);
+	// ceil((dataBufBytes * 8) / dataBits) * (2**parityBitNum) / 8
+	return (((dataBufBytes << 3) - 1) / dataBits + 1) << (parityBitNum - 3);
 }
 
 unsigned int HammingCode::Check()
@@ -46,7 +47,7 @@ unsigned int HammingCode::Check()
 	unsigned int i, j, index;
 	unsigned char temp;
 	
-	for (i = 0; i < codeBytesNum; i++) {
+	for (i = 0; i < codeBufBytes; i++) {
 		temp = code[i];
 		for (j = 0, index = i << 3; j < 8; j++, index++, temp >>= 1) {
 			if (temp & 1) {
@@ -64,17 +65,17 @@ void HammingCode::Encode()
 		return;
 
 	unsigned int status = 0, codeNum = 1 << parityBitNum;
-	unsigned int codeBytesNum = GetCodeBytesNum();
+	unsigned int codeBufBytes = GetCodeBufBytes();
 	unsigned int codeByte = 0, codeBit = 3, index = 3;
 	unsigned char temp = data[0];
 	unsigned int dataByte = 0, dataBit = 0;
 
-	while (codeByte < codeBytesNum) {
+	while (codeByte < codeBufBytes) {
 		// get data
 
 		if (dataBit == 8) {
 			dataBit = 0;
-			if (++dataByte < dataBytesNum)
+			if (++dataByte < dataBufBytes)
 				temp = data[dataByte];
 			else
 				temp = 0;
@@ -110,7 +111,7 @@ void HammingCode::Encode()
 				if (status & 1) {
 					// parity bit at position 2**i should be 1
 					int j = 1 << i; // parity bit position
-					code[codeByte - bytesNum + (j >> 3)] |= 1 << (j & 7);
+					code[codeByte - codeBytes + (j >> 3)] |= 1 << (j & 7);
 				}
 			}
 			codeBit = 3;
@@ -130,11 +131,11 @@ void HammingCode::Decode()
 	unsigned int temp = code[0]; // fix
 	unsigned int dataByte = 0, dataBit = 0;
 
-	for (codeByte = 0; codeByte < codeBytesNum;) {
+	for (codeByte = 0; codeByte < codeBufBytes;) {
 
 		index = 0;
 
-		for (int i = 0; i < bytesNum; i++, codeByte++) {
+		for (int i = 0; i < codeBytes; i++, codeByte++) {
 
 			temp = code[codeByte];
 
